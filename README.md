@@ -16,4 +16,4 @@
   `rosrun stage_ros_add_pose_and_crash stageros -g worlds/stage1.world`   
   `mpiexec -np 24 python ppo_stage1_360.py`  
   `rosrun stage_ros_add_pose_and_crash stageros -g worlds/stage2.world`  
-  `mpiexec -np 44 python ppo_stage2_360.py`  
+  `mpiexec -np 44 python ppo_stage2_360.py`   
