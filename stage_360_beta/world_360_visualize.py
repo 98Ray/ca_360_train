@@ -43,6 +43,7 @@ class StageWorld():
         # self.reset_pose = None
 
         self.now_pose = None
+        self.update = False
 
         # -----------Publisher and Subscriber-------------
         # 为机器人发布指定速度（线速度+加速度）
@@ -120,21 +121,26 @@ class StageWorld():
         # xya_his是列表，含有三个元素xya
         xya_now = self.state_GT
         # 返回是否需要更新历史信息
-        dis = math.sqrt(math.pow(xya_now[0] - xya_his[0], 2) + math.pow(xya_now[1] - xya_his[1], 2))  # cm
-        theta = abs(xya_his[2] - xya_now[2])  # degree
+        dis = math.sqrt(math.pow(xya_now[0] - xya_his[0], 2) + math.pow(xya_now[1] - xya_his[1], 2))  # m
+        theta = abs(xya_his[2] - xya_now[2])  # rad
         # print("now_a:{},his_a{}:".format(xya_now[2], xya_his[2]))
         # print("now_xy:({},{}),his_xy:({},{})".format(xya_now[0],xya_now[1],xya_his[0],xya_his[1]))
         # 距离大于20cm或者角度大于10°
-        if dis > 0.2 or theta > 0.175:
+        if dis > 1.5 or theta > 0.175:
             # print("theta:{},dis{}:".format(theta, dis))
             print("Update!")
+            self.update = True
             return True
         else:
+            self.update = False
             return False
 
     def polars_full2r_filtered_rad(self, obs_his, poses_his):
-        obs_his_to_now = u_c.hisPolars2nowPolar_rad(obs_his, poses_his, self.state_GT)
+        # if self.update:
+        #     print()
+        obs_his_to_now = u_c.hisPolars2nowPolar_rad(obs_his, poses_his, self.state_GT, self.max_range, self.update)  # 耗时1ms
         lidar_polar = self.get_laser_polar()
+
         obs_full_polar = torch.cat((obs_his_to_now, lidar_polar.unsqueeze(0)), dim=0)
         full_r_id = u_c.polars2index(input_rps=obs_full_polar, out_lines=self.out_lines, scope_keep=2 * np.pi)  # his*N*2
         r_filtered, t_feature = u_c.index_filter(full_r_id, self.max_range, self.out_lines)
@@ -147,5 +153,5 @@ if __name__ == '__main__':
     obs_his = deque([torch.tensor([[1, -np.pi]])])
     poses_his = deque([[3, 1, 0]])
     pose_now = [4, 1, 0]
-    obs_his_to_now = u_c.hisPolars2nowPolar_rad(obs_his, poses_his, pose_now)
+    obs_his_to_now = u_c.hisPolars2nowPolar_rad(obs_his, poses_his, pose_now, 6.0)
     print("wow")
