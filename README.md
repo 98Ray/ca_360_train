@@ -1,6 +1,6 @@
 ## 训练说明
 ### 仿真环境准备
-参考https://github.com/Acmece/rl-collision-avoidance的仿真环境构建  
+参考https://github.com/Acmece/rl-collision-avoidance 的仿真环境构建  
 
 ### 文件描述
 1. policy中是训练的模型文件  
